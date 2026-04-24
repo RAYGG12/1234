@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FieldVoice Pro | 現場語音助理</title>
+    <link rel="manifest" href="/manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .record-btn { width: 140px; height: 140px; border-radius: 50%; transition: all 0.3s; }
+        .recording { background-color: #ef4444; transform: scale(1.1); box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+    </style>
+</head>
+<body class="bg-[#1A1A1A] text-white flex flex-col items-center justify-between min-h-screen p-6">
+    <header class="w-full text-center py-4">
+        <h1 class="text-[#FFBF00] text-2xl font-black tracking-tight">FIELDVOICE PRO</h1>
+        <p class="text-gray-400 text-sm">技術人員專用數位轉譯</p>
+    </header>
+
+    <main class="flex flex-col items-center w-full max-w-md">
+        <div id="status" class="mb-8 text-lg font-bold text-center">準備就緒，點擊下方開始紀錄</div>
+        
+        <button id="recordBtn" class="record-btn bg-[#FFBF00] flex items-center justify-center shadow-lg">
+            <svg id="micIcon" class="w-16 h-16 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-20a3 3 0 00-3 3v8a3 3 0 006 0V5a3 3 0 00-3-3z"></path>
+            </svg>
+        </button>
+
+        <div class="mt-12 w-full">
+            <label class="text-[#FFBF00] text-sm font-bold block mb-2">自動生成工單摘要：</label>
+            <div id="resultText" class="bg-[#2A2A2A] p-4 rounded-xl border border-gray-700 min-h-[150px] text-lg leading-relaxed italic text-gray-300">
+                語音內容將顯示在此處...
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full pb-6">
+        <button id="sendBtn" class="w-full bg-[#FFBF00] text-black font-bold py-4 rounded-xl text-lg hidden">
+            確認並發送報價單
+        </button>
+    </footer>
+
+    <script>
+        const recordBtn = document.getElementById('recordBtn');
+        const resultText = document.getElementById('resultText');
+        const statusText = document.getElementById('status');
+        const sendBtn = document.getElementById('sendBtn');
+        let isRecording = false;
+
+        // 檢查瀏覽器是否支援語音辨識
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.lang = 'zh-TW';
+
+            recordBtn.onclick = () => {
+                if (!isRecording) {
+                    recognition.start();
+                    isRecording = true;
+                    recordBtn.classList.add('recording');
+                    statusText.innerText = "正在聆聽中...";
+                    statusText.classList.add('text-red-500');
+                } else {
+                    recognition.stop();
+                    isRecording = false;
+                    recordBtn.classList.remove('recording');
+                    statusText.innerText = "處理完畢";
+                    statusText.classList.remove('text-red-500');
+                }
+            };
+
+            recognition.onresult = (event) => {
+                let current = event.resultIndex;
+                let transcript = event.results[current][0].transcript;
+                resultText.innerText = transcript;
+                sendBtn.classList.remove('hidden');
+            };
+        } else {
+            statusText.innerText = "您的瀏覽器不支援語音辨識";
+        }
+    </script>
+</body>
+</html>

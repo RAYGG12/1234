@@ -1,0 +1,15 @@
+{
+  "name": "FieldVoice Pro",
+  "short_name": "FieldVoice",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1A1A1A",
+  "theme_color": "#FFBF00",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3064/3064197.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
