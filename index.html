@@ -3,81 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FieldVoice Pro | 現場語音助理</title>
+    <title>FieldVoice Pro v2</title>
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        .record-btn { width: 140px; height: 140px; border-radius: 50%; transition: all 0.3s; }
+        .record-btn { width: 120px; height: 120px; border-radius: 50%; transition: all 0.3s; }
         .recording { background-color: #ef4444; transform: scale(1.1); box-shadow: 0 0 30px rgba(239, 68, 68, 0.6); }
+        .action-btn { transition: all 0.2s; }
+        .action-btn:active { transform: scale(0.95); }
     </style>
 </head>
-<body class="bg-[#1A1A1A] text-white flex flex-col items-center justify-between min-h-screen p-6">
-    <header class="w-full text-center py-4">
-        <h1 class="text-[#FFBF00] text-2xl font-black tracking-tight">FIELDVOICE PRO</h1>
-        <p class="text-gray-400 text-sm">技術人員專用數位轉譯</p>
+<body class="bg-[#1A1A1A] text-white flex flex-col items-center min-h-screen p-6">
+    
+    <header class="w-full text-center py-6">
+        <h1 class="text-[#FFBF00] text-3xl font-black tracking-tighter">FIELDVOICE PRO <span class="text-xs border border-[#FFBF00] px-1 ml-1">V2</span></h1>
+        <p id="status" class="text-gray-400 text-sm mt-2">點擊按鈕開始紀錄工作</p>
     </header>
 
-    <main class="flex flex-col items-center w-full max-w-md">
-        <div id="status" class="mb-8 text-lg font-bold text-center">準備就緒，點擊下方開始紀錄</div>
+    <main class="flex flex-col items-center w-full max-w-md space-y-8">
         
-        <button id="recordBtn" class="record-btn bg-[#FFBF00] flex items-center justify-center shadow-lg">
-            <svg id="micIcon" class="w-16 h-16 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-20a3 3 0 00-3 3v8a3 3 0 006 0V5a3 3 0 00-3-3z"></path>
-            </svg>
-        </button>
+        <div class="relative">
+            <button id="recordBtn" class="record-btn bg-[#FFBF00] flex items-center justify-center shadow-2xl">
+                <svg id="micIcon" class="w-14 h-14 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-20a3 3 0 00-3 3v8a3 3 0 006 0V5a3 3 0 00-3-3z"></path>
+                </svg>
+            </button>
+        </div>
 
-        <div class="mt-12 w-full">
-            <label class="text-[#FFBF00] text-sm font-bold block mb-2">自動生成工單摘要：</label>
-            <div id="resultText" class="bg-[#2A2A2A] p-4 rounded-xl border border-gray-700 min-h-[150px] text-lg leading-relaxed italic text-gray-300">
-                語音內容將顯示在此處...
+        <div class="w-full space-y-2">
+            <div class="flex justify-between items-center">
+                <span class="text-[#FFBF00] text-xs font-bold uppercase tracking-widest">工單內容摘要</span>
+                <button onclick="clearText()" class="text-gray-500 text-xs underline">清除重來</button>
             </div>
+            <textarea id="resultText" class="w-full bg-[#2A2A2A] p-4 rounded-2xl border border-gray-700 min-h-[200px] text-lg text-gray-200 focus:outline-none focus:border-[#FFBF00]" placeholder="語音轉譯內容將顯示於此..."></textarea>
+        </div>
+
+        <div id="actionGroup" class="grid grid-cols-2 gap-4 w-full opacity-50 pointer-events-none">
+            <button onclick="exportToExcel()" class="action-btn flex items-center justify-center space-x-2 bg-white text-black font-bold py-4 rounded-xl">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>匯出 Excel</span>
+            </button>
+            <button onclick="sendEmail()" class="action-btn flex items-center justify-center space-x-2 bg-[#FFBF00] text-black font-bold py-4 rounded-xl">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                <span>寄送郵件</span>
+            </button>
         </div>
     </main>
-
-    <footer class="w-full pb-6">
-        <button id="sendBtn" class="w-full bg-[#FFBF00] text-black font-bold py-4 rounded-xl text-lg hidden">
-            確認並發送報價單
-        </button>
-    </footer>
 
     <script>
         const recordBtn = document.getElementById('recordBtn');
         const resultText = document.getElementById('resultText');
         const statusText = document.getElementById('status');
-        const sendBtn = document.getElementById('sendBtn');
+        const actionGroup = document.getElementById('actionGroup');
         let isRecording = false;
 
-        // 檢查瀏覽器是否支援語音辨識
+        // 1. 權限檢查與初始化
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+        async function checkPermission() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(track => track.stop()); // 檢查完即關閉
+                return true;
+            } catch (err) {
+                statusText.innerText = "❌ 未取得麥克風權限";
+                return false;
+            }
+        }
+
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.lang = 'zh-TW';
+            recognition.interimResults = true;
 
-            recordBtn.onclick = () => {
+            recordBtn.onclick = async () => {
+                const hasPermission = await checkPermission();
+                if (!hasPermission) return;
+
                 if (!isRecording) {
                     recognition.start();
                     isRecording = true;
                     recordBtn.classList.add('recording');
-                    statusText.innerText = "正在聆聽中...";
-                    statusText.classList.add('text-red-500');
+                    statusText.innerText = "🔴 正在聽取內容...";
                 } else {
                     recognition.stop();
                     isRecording = false;
                     recordBtn.classList.remove('recording');
-                    statusText.innerText = "處理完畢";
-                    statusText.classList.remove('text-red-500');
+                    statusText.innerText = "✅ 已停止並紀錄";
+                    actionGroup.classList.remove('opacity-50', 'pointer-events-none');
                 }
             };
 
             recognition.onresult = (event) => {
-                let current = event.resultIndex;
-                let transcript = event.results[current][0].transcript;
-                resultText.innerText = transcript;
-                sendBtn.classList.remove('hidden');
+                let transcript = "";
+                for (let i = 0; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                resultText.value = transcript;
             };
-        } else {
-            statusText.innerText = "您的瀏覽器不支援語音辨識";
+
+            recognition.onerror = (e) => {
+                statusText.innerText = "❌ 錯誤: " + e.error;
+                isRecording = false;
+                recordBtn.classList.remove('recording');
+            };
+        }
+
+        // 2. 匯出 Excel (CSV 格式)
+        function exportToExcel() {
+            const content = resultText.value;
+            if (!content) return alert("沒有內容可匯出");
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString();
+            // 建立 CSV 內容 (加 BOM 頭確保 Excel 開啟不亂碼)
+            const csvContent = "\uFEFF" + "日期,工作內容\n" + `${dateStr},"${content.replace(/"/g, '""')}"`;
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `FieldWork_${now.getTime()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 3. 寄送郵件
+        function sendEmail() {
+            const content = resultText.value;
+            if (!content) return alert("請先錄製內容");
+            
+            const subject = encodeURIComponent("FieldVoice Pro 工作紀錄報告");
+            const body = encodeURIComponent(`現場工作紀錄如下：\n\n${content}\n\n---\n來自 FieldVoice Pro`);
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        function clearText() {
+            if(confirm("確定要清除目前內容嗎？")) {
+                resultText.value = "";
+                actionGroup.classList.add('opacity-50', 'pointer-events-none');
+            }
         }
     </script>
 </body>
