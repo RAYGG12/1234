@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FieldVoice Pro v7 | AI Diagnostics</title>
-    <link rel="manifest" href="/manifest.json">
+    <title>FieldVoice Global AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
@@ -17,32 +16,44 @@
     
     <header class="w-full max-w-md flex justify-between items-center py-6">
         <h1 class="text-xl font-black tracking-tighter italic text-slate-800">FIELDVOICE <span class="text-blue-600">AI</span></h1>
-        <select id="langSelect" class="bg-white border-none text-[10px] font-black uppercase tracking-widest text-slate-400 outline-none">
-            <option value="zh-TW">繁體中文</option>
-            <option value="en-US">English</option>
-            <option value="sv-SE">Svenska</option>
+        <select id="langSelect" class="bg-white border-none text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none shadow-sm px-2 py-1 rounded">
+            <option value="zh-TW">繁體中文 (Traditional Chinese)</option>
+            <option value="zh-CN">简体中文 (Simplified Chinese)</option>
+            <option value="en-US">English (US)</option>
+            <option value="ja-JP">日本語 (Japanese)</option>
+            <option value="ko-KR">한국어 (Korean)</option>
+            <option value="sv-SE">Svenska (Swedish)</option>
+            <option value="es-ES">Español (Spanish)</option>
+            <option value="fr-FR">Français (French)</option>
+            <option value="de-DE">Deutsch (German)</option>
         </select>
     </header>
 
     <main class="w-full max-w-md space-y-4">
-        <div class="bg-white rounded-[2.5rem] p-10 shadow-xl shadow-slate-200/50 flex flex-col items-center border border-white">
-            <button id="recordBtn" class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center shadow-lg transition-transform active:scale-90">
-                <svg id="micIcon" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 flex flex-col items-center border border-white">
+            <button id="recordBtn" class="w-16 h-16 rounded-full bg-blue-600 flex items-center justify-center shadow-lg transition-transform active:scale-90">
+                <svg id="micIcon" class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
             </button>
-            <p id="status" class="mt-6 text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em]">Ready</p>
+            <p id="status" class="mt-4 text-[10px] font-bold text-slate-300 uppercase tracking-[0.3em]">Ready</p>
+            
+            <div class="mt-6 w-full border-t border-slate-50 pt-4 text-center">
+                <label class="cursor-pointer group">
+                    <span class="text-[11px] font-bold text-blue-600 group-hover:underline">或上傳語音檔案 (MP3/WAV/AAC)</span>
+                    <input type="file" id="audioFile" class="hidden" accept="audio/*">
+                </label>
+                <p id="fileName" class="text-[10px] text-slate-400 mt-1 truncate"></p>
+            </div>
         </div>
 
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-6">
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
             <div>
-                <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-2">原始紀錄內容</label>
-                <textarea id="resultText" class="w-full bg-slate-50 p-4 rounded-2xl text-sm border-none focus:ring-2 focus:ring-blue-100 h-28" placeholder="說話後 AI 將自動分析..."></textarea>
+                <label class="text-[10px] font-black text-blue-600 uppercase tracking-widest block mb-2">原始紀錄 / 檔案轉錄</label>
+                <textarea id="resultText" class="w-full bg-slate-50 p-4 rounded-2xl text-sm border-none focus:ring-2 focus:ring-blue-100 h-28" placeholder="即時說話或上傳檔案後，AI 將在此生成內容..."></textarea>
             </div>
 
             <div>
-                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">AI 智慧分類結果</label>
-                <div id="dynamicFields" class="space-y-2">
-                    <p class="text-xs text-slate-300 italic">等待分析數據...</p>
-                </div>
+                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-3">AI 智慧分析結果</label>
+                <div id="dynamicFields" class="space-y-2 text-xs text-slate-300 italic">等待數據中...</div>
             </div>
         </div>
 
@@ -54,6 +65,7 @@
 
     <script>
         const recordBtn = document.getElementById('recordBtn');
+        const audioFile = document.getElementById('audioFile');
         const resultText = document.getElementById('resultText');
         const statusText = document.getElementById('status');
         const dynamicFields = document.getElementById('dynamicFields');
@@ -63,7 +75,7 @@
         let isRecording = false;
         let detectedItems = {};
 
-        // 1. 語音辨識
+        // 1. 即時語音辨識
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
@@ -72,116 +84,100 @@
 
             recordBtn.onclick = async () => {
                 recognition.lang = langSelect.value;
-                try {
-                    if (!isRecording) {
-                        await navigator.mediaDevices.getUserMedia({ audio: true });
-                        recognition.start();
-                    } else {
-                        recognition.stop();
-                    }
-                } catch (e) { alert("麥克風存取失敗，請檢查權限設定。"); }
+                if (!isRecording) {
+                    await navigator.mediaDevices.getUserMedia({ audio: true });
+                    recognition.start();
+                } else {
+                    recognition.stop();
+                }
             };
 
-            recognition.onstart = () => {
-                isRecording = true;
-                recordBtn.classList.add('mic-on');
-                statusText.innerText = "Listening...";
-            };
-
-            recognition.onend = () => {
-                isRecording = false;
-                recordBtn.classList.remove('mic-on');
-                statusText.innerText = "Analyzing...";
-                callAI(resultText.value);
-            };
-
+            recognition.onstart = () => { isRecording = true; recordBtn.classList.add('mic-on'); statusText.innerText = "Listening..."; };
+            recognition.onend = () => { isRecording = false; recordBtn.classList.remove('mic-on'); statusText.innerText = "Analyzing..."; callAI(resultText.value, 'text'); };
             recognition.onresult = (event) => {
                 let text = "";
-                for (let i = 0; i < event.results.length; i++) {
-                    text += event.results[i][0].transcript;
-                }
+                for (let i = 0; i < event.results.length; i++) { text += event.results[i][0].transcript; }
                 resultText.value = text;
             };
         }
 
-        // 2. 核心 AI 呼叫 (強健診斷版)
-        async function callAI(text) {
-            if (!text.trim()) return;
-            statusText.innerText = "AI Thinking...";
-            
+        // 2. 檔案處理邏輯
+        audioFile.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 4 * 1024 * 1024) return alert("檔案太大囉！請上傳 4MB 以下的檔案。");
+
+            document.getElementById('fileName').innerText = "已選取：" + file.name;
+            statusText.innerText = "Uploading & AI Processing...";
+
+            // 將檔案轉為 Base64
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = async () => {
+                const base64Data = reader.result.split(',')[1];
+                callAI(base64Data, 'audio', file.type);
+            };
+        };
+
+        // 3. 呼叫 Vercel AI (支援文字與音訊)
+        async function callAI(content, type, mimeType = "") {
             try {
-                const response = await fetch('/.netlify/functions/analyze', {
+                const response = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
+                    body: JSON.stringify({ 
+                        data: content, 
+                        type: type, 
+                        mimeType: mimeType,
+                        lang: langSelect.options[langSelect.selectedIndex].text 
+                    })
                 });
 
-                const rawData = await response.text();
-                console.log("AI 原始回傳:", rawData);
-
-                try {
-                    // 嘗試解析 JSON
-                    detectedItems = JSON.parse(rawData);
-                    renderUI();
-                    statusText.innerText = "AI Success";
-                } catch (jsonErr) {
-                    // 如果解析失敗（AI 回傳純文字），直接顯示文字不報錯
-                    dynamicFields.innerHTML = `<div class="p-4 bg-amber-50 text-amber-700 rounded-xl text-xs border border-amber-100">
-                        <strong>AI 解析提醒：</strong><br>${rawData}
-                    </div>`;
-                    statusText.innerText = "Partial Success";
-                }
+                const result = await response.json();
                 
+                // 如果是檔案轉錄，更新原始內容框
+                if (type === 'audio' && result._transcript) {
+                    resultText.value = result._transcript;
+                    delete result._transcript; // 移除隱藏標籤，不顯示在分類卡片
+                }
+
+                detectedItems = result;
+                renderUI();
+                statusText.innerText = "AI Success";
                 exportGrid.classList.remove('opacity-20', 'pointer-events-none');
 
             } catch (err) {
-                console.error("連線錯誤:", err);
                 statusText.innerText = "AI Offline";
-                dynamicFields.innerHTML = `<p class="text-red-500 text-xs font-bold">連線失敗：${err.message}</p>`;
+                dynamicFields.innerHTML = `<p class="text-red-500 text-[10px]">Error: ${err.message}</p>`;
             }
         }
 
-        // 3. UI 渲染
         function renderUI() {
             dynamicFields.innerHTML = "";
-            const keys = Object.keys(detectedItems);
-            if (keys.length === 0) {
-                dynamicFields.innerHTML = `<p class="text-xs text-slate-300 italic">未偵測到明確分類...</p>`;
-                return;
-            }
-
-            keys.forEach(key => {
+            Object.keys(detectedItems).forEach(key => {
                 const div = document.createElement('div');
                 div.className = "flex justify-between items-center bg-slate-50 p-3 rounded-xl border border-slate-100";
-                div.innerHTML = `
-                    <span class="text-[10px] font-bold text-slate-400 uppercase">${key}</span>
-                    <span class="text-sm font-black text-slate-700">${detectedItems[key]}</span>
-                `;
+                div.innerHTML = `<span class="text-[10px] font-bold text-slate-400 uppercase">${key}</span><span class="text-sm font-black text-slate-700">${detectedItems[key]}</span>`;
                 dynamicFields.appendChild(div);
             });
         }
 
-        // 4. 匯出功能
         function exportExcel() {
             const keys = Object.keys(detectedItems);
-            if (keys.length === 0) return alert("尚無數據");
             const headers = "\uFEFF" + keys.join(",");
             const values = keys.map(k => `"${detectedItems[k]}"`).join(",");
             const blob = new Blob([`${headers}\n${values}`], { type: 'text/csv;charset=utf-8;' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `Report_${Date.now()}.csv`;
+            a.download = `Report.csv`;
             a.click();
         }
 
         async function shareToSocial() {
-            let shareText = "FieldVoice AI 紀錄：\n";
+            let shareText = "AI Report:\n";
             Object.keys(detectedItems).forEach(k => shareText += `${k}: ${detectedItems[k]}\n`);
-            if (navigator.share) {
-                await navigator.share({ title: 'Work Report', text: shareText, url: window.location.href });
-            } else {
-                window.open(`https://line.me/R/msg/text/?${encodeURIComponent(shareText)}`);
-            }
+            if (navigator.share) await navigator.share({ title: 'Report', text: shareText, url: window.location.href });
+            else window.open(`https://line.me/R/msg/text/?${encodeURIComponent(shareText)}`);
         }
     </script>
 </body>
