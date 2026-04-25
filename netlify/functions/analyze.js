@@ -1,4 +1,4 @@
-// analyze.js - 這是妳的 AI 轉譯中轉站
+const fetch = require('node-fetch');
 export const handler = async (event) => {
   // 只允許 POST 請求
   if (event.httpMethod !== "POST") {
