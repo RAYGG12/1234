@@ -1,20 +1,16 @@
-const fetch = require('node-fetch');
+// analyze.js - 2026 無插件純淨版
 export const handler = async (event) => {
-  // 只允許 POST 請求
   if (event.httpMethod !== "POST") {
     return { statusCode: 405, body: "Method Not Allowed" };
   }
 
-  const { text } = JSON.parse(event.body);
-  const API_KEY = process.env.GEMINI_API_KEY; // 這是我們在 Netlify 後台設定的金鑰
-
-  // 餵給 AI 的指令（Prompt）
-  const prompt = `請將以下語音轉錄內容解析為 JSON 格式。
-  自動偵測所有提到的項目（例如日期、金額、公司、品項、備註等）。
-  內容：${text}
-  請只回傳 JSON 格式，不要有其他文字。`;
-
   try {
+    const { text } = JSON.parse(event.body);
+    const API_KEY = process.env.GEMINI_API_KEY;
+
+    const prompt = `請將以下語音內容解析為 JSON 格式，自動偵測項目與數值。內容：${text}`;
+
+    // 直接使用內建 fetch，不需要 require
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -25,26 +21,22 @@ export const handler = async (event) => {
 
     const data = await response.json();
     
-    // 檢查 AI 是否有正確回傳
-    if (!data.candidates || data.candidates.length === 0) {
-      throw new Error("AI 無法解析內容");
+    if (!data.candidates) {
+      return { statusCode: 500, body: JSON.stringify({ error: "API Key 格式或權限可能有誤" }) };
     }
 
-    let aiText = data.candidates[0].content.parts[0].text;
-    
-    // 處理 AI 有時會多給的 Markdown 符號 (```json ... ```)
-    const jsonMatch = aiText.match(/\{.*\}/s);
-    const cleanedJson = jsonMatch ? jsonMatch[0] : aiText;
+    const aiResponse = data.candidates[0].content.parts[0].text;
+    const jsonMatch = aiResponse.match(/\{.*\}/s);
 
     return {
       statusCode: 200,
       headers: { "Content-Type": "application/json" },
-      body: cleanedJson
+      body: jsonMatch ? jsonMatch[0] : aiResponse
     };
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "AI 服務暫時不可用", details: error.message })
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
