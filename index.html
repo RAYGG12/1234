@@ -3,62 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FieldVoice Pro v3 | 智慧轉譯系統</title>
+    <title>FieldVoice Pro v4</title>
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .mic-active { animation: pulse 1.5s infinite; background-color: #ef4444 !important; }
+        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    </style>
 </head>
-<body class="bg-[#0F0F0F] text-white flex flex-col items-center min-h-screen p-4 pb-10">
+<body class="bg-slate-50 text-slate-900 flex flex-col items-center min-h-screen p-4 pb-12">
     
-    <header class="w-full text-center py-6">
-        <h1 class="text-[#FFBF00] text-3xl font-black italic tracking-tighter">FIELDVOICE <span class="bg-[#FFBF00] text-black px-2 rounded">PRO v3</span></h1>
-        <p id="status" class="text-gray-500 text-xs mt-2 uppercase tracking-[0.2em]">Ready for Smart Sync</p>
+    <header class="w-full max-w-md flex justify-between items-center py-8">
+        <div>
+            <h1 class="text-2xl font-black tracking-tighter text-slate-800">FIELDVOICE <span class="text-blue-600">PRO</span></h1>
+            <p id="status" class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Ready to Record</p>
+        </div>
+        <div class="bg-white p-2 rounded-full shadow-sm border border-slate-100">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+        </div>
     </header>
 
     <main class="w-full max-w-md space-y-6">
         
-        <div class="flex justify-center py-4">
-            <button id="recordBtn" class="w-28 h-28 rounded-full bg-[#FFBF00] flex items-center justify-center shadow-[0_0_40px_rgba(255,191,0,0.3)] transition-all active:scale-95">
-                <svg id="micIcon" class="w-12 h-12 text-black" fill="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-white flex flex-col items-center space-y-6">
+            <button id="recordBtn" class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200 transition-all active:scale-90">
+                <svg id="micIcon" class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                 </svg>
             </button>
-        </div>
-
-        <div class="space-y-2">
-            <div class="flex justify-between items-end">
-                <span class="text-[#FFBF00] text-xs font-bold uppercase">語音轉錄原文</span>
-                <button onclick="clearAll()" class="text-gray-600 text-xs hover:text-red-400">清除數據</button>
+            <div class="text-center">
+                <p class="text-sm font-medium text-slate-500">點擊開始即時說話</p>
+                <div class="flex items-center justify-center mt-4 space-x-2">
+                    <label class="cursor-pointer text-blue-600 text-xs font-bold hover:underline">
+                        或上傳語音檔
+                        <input type="file" id="audioUpload" class="hidden" accept="audio/*">
+                    </label>
+                </div>
             </div>
-            <textarea id="resultText" class="w-full bg-[#1A1A1A] p-4 rounded-xl border border-gray-800 h-32 text-sm text-gray-300 focus:border-[#FFBF00] outline-none" placeholder="說話後內容會出現在這..."></textarea>
         </div>
 
-        <div id="parsedCard" class="hidden bg-[#222] p-4 rounded-xl border-l-4 border-[#FFBF00] space-y-3 shadow-xl">
-            <h3 class="text-[#FFBF00] text-xs font-bold italic">AI 自動分類結果</h3>
-            <div class="grid grid-cols-2 gap-3 text-xs">
-                <div class="text-gray-500">日期：<span id="p-date" class="text-white block mt-1 text-sm">-</span></div>
-                <div class="text-gray-500">公司：<span id="p-company" class="text-white block mt-1 text-sm">-</span></div>
-                <div class="text-gray-500">品項：<span id="p-item" class="text-white block mt-1 text-sm">-</span></div>
-                <div class="text-gray-500">金額：<span id="p-price" class="text-white block mt-1 text-sm">-</span></div>
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-50 pb-3">
+                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Smart Capture</h3>
+                <button onclick="location.reload()" class="text-[10px] font-bold text-slate-300">RESET</button>
+            </div>
+            
+            <textarea id="resultText" class="w-full bg-transparent border-none text-slate-700 text-base leading-relaxed focus:ring-0 resize-none h-32" placeholder="語音轉譯內容將顯示於此..."></textarea>
+            
+            <div id="parsedInfo" class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 text-[11px]">
+                <div><span class="text-slate-400 block mb-1 uppercase">Company</span><span id="p-company" class="font-bold text-slate-700">-</span></div>
+                <div><span class="text-slate-400 block mb-1 uppercase">Price</span><span id="p-price" class="font-bold text-slate-700">-</span></div>
             </div>
         </div>
 
         <div id="exportGrid" class="grid grid-cols-2 gap-3 opacity-30 pointer-events-none">
-            <button onclick="exportExcel()" class="bg-green-600 hover:bg-green-500 text-white text-xs font-bold py-3 rounded-lg flex flex-col items-center">
-                <span>Excel (分類)</span>
-            </button>
-            <button onclick="exportPDF()" class="bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-3 rounded-lg flex flex-col items-center">
-                <span>PDF 報告</span>
-            </button>
-            <button onclick="exportWord()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold py-3 rounded-lg flex flex-col items-center">
-                <span>Word 檔</span>
-            </button>
-            <button onclick="exportTxt()" class="bg-gray-700 hover:bg-gray-600 text-white text-xs font-bold py-3 rounded-lg flex flex-col items-center">
-                <span>純文字 TXT</span>
-            </button>
-            <button onclick="sendEmail()" class="col-span-2 bg-[#FFBF00] text-black font-black py-4 rounded-lg uppercase text-sm tracking-widest mt-2">
-                直接寄信發送
-            </button>
+            <button onclick="exportExcel()" class="bg-slate-900 text-white py-4 rounded-2xl text-xs font-bold shadow-lg shadow-slate-200">EXCEL (CSV)</button>
+            <button onclick="exportPDF()" class="bg-white text-slate-900 border border-slate-200 py-4 rounded-2xl text-xs font-bold">PDF REPORT</button>
+            <button onclick="exportWord()" class="bg-white text-slate-900 border border-slate-200 py-4 rounded-2xl text-xs font-bold">WORD DOC</button>
+            <button onclick="sendEmail()" class="bg-blue-50 text-blue-600 py-4 rounded-2xl text-xs font-bold">SEND EMAIL</button>
         </div>
     </main>
 
@@ -67,32 +72,44 @@
         const resultText = document.getElementById('resultText');
         const statusText = document.getElementById('status');
         const exportGrid = document.getElementById('exportGrid');
+        const audioUpload = document.getElementById('audioUpload');
         let isRecording = false;
-
-        // 結構化數據容器
         let structuredData = { date: '', company: '', item: '', price: '' };
 
-        // 1. 語音辨識邏輯
+        // 修正版語音啟動邏輯
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.lang = 'zh-TW';
             recognition.interimResults = true;
 
-            recordBtn.onclick = () => {
-                if (!isRecording) {
-                    recognition.start();
-                    isRecording = true;
-                    recordBtn.classList.add('bg-red-600', 'animate-pulse');
-                    statusText.innerText = "Listening...";
-                } else {
-                    recognition.stop();
-                    isRecording = false;
-                    recordBtn.classList.remove('bg-red-600', 'animate-pulse');
-                    statusText.innerText = "Data Processed";
-                    smartParse(resultText.value); // 錄音結束後自動分析
+            recordBtn.onclick = async () => {
+                // 手機端修正：啟動前先請求一次權限確保硬體喚醒
+                try {
+                    if (!isRecording) {
+                        await navigator.mediaDevices.getUserMedia({ audio: true });
+                        recognition.start();
+                        statusText.innerText = "Listening...";
+                    } else {
+                        recognition.stop();
+                        statusText.innerText = "Processed";
+                    }
+                } catch (err) {
+                    alert("麥克風啟動失敗，請檢查權限設定");
                 }
+            };
+
+            recognition.onstart = () => {
+                isRecording = true;
+                recordBtn.classList.add('mic-active');
+            };
+
+            recognition.onend = () => {
+                isRecording = false;
+                recordBtn.classList.remove('mic-active');
+                smartParse(resultText.value);
             };
 
             recognition.onresult = (event) => {
@@ -105,27 +122,62 @@
             };
         }
 
-        // 2. 核心：智慧排版邏輯 (Smart Parser)
+        // 語音檔轉文字 (模擬邏輯，真實環境需串接 API)
+        audioUpload.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                statusText.innerText = "Analyzing File...";
+                // 注意：純瀏覽器無法直接將語音檔轉文字。
+                // 這裡我們模擬一個處理過程，並提示使用者。
+                setTimeout(() => {
+                    resultText.value = `[檔案紀錄: ${file.name}]\n請注意：網頁版目前僅支援「即時語音辨識」。\n若要進行檔案轉譯，建議串接 Gemini 或 Whisper API。`;
+                    exportGrid.classList.remove('opacity-30', 'pointer-events-none');
+                    statusText.innerText = "File Loaded";
+                }, 1500);
+            }
+        };
+
         function smartParse(text) {
-            // 設定日期
             structuredData.date = new Date().toLocaleDateString();
-            
-            // 邏輯拆解：利用正則表達式尋找模式
-            // 匹配公司：找 "跟/與 [XXX公司]"
             const companyMatch = text.match(/(?:跟|與|向)(.*?公司)/);
-            structuredData.company = companyMatch ? companyMatch[1] : "未偵測到公司";
-
-            // 匹配品項：找 "交易/購買 [XXX]"
-            const itemMatch = text.match(/(?:交易|購買|品項為)(.*?)(?:，|,|共計|花費|。|$)/);
-            structuredData.item = itemMatch ? itemMatch[1] : "未偵測到品項";
-
-            // 匹配金額：找數字加上 "元"
+            structuredData.company = companyMatch ? companyMatch[1] : "General";
             const priceMatch = text.match(/(\d+)\s*元/);
             structuredData.price = priceMatch ? priceMatch[1] : "0";
 
-            // 更新 UI
-            document.getElementById('p-date').innerText = structuredData.date;
             document.getElementById('p-company').innerText = structuredData.company;
-            document.getElementById('p-item').innerText = structuredData.item;
-            document.getElementById('p-price').innerText = structuredData.price + " 元";
-            document.getElementById
+            document.getElementById('p-price').innerText = structuredData.price + " TWD";
+        }
+
+        // 匯出功能與前版本相同，已針對白色系優化下載行為...
+        function exportExcel() {
+            const csv = "\uFEFF日期,公司,金額,內容\n" + `${structuredData.date},${structuredData.company},${structuredData.price},"${resultText.value}"`;
+            downloadFile(csv, 'Report.csv', 'text/csv');
+        }
+
+        function exportPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.setFontSize(20);
+            doc.text("FieldVoice Report", 20, 20);
+            doc.setFontSize(12);
+            doc.text(`Date: ${structuredData.date}`, 20, 40);
+            doc.text(`Details: ${resultText.value}`, 20, 60);
+            doc.save("Report.pdf");
+        }
+
+        function downloadFile(content, fileName, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            a.click();
+        }
+
+        function sendEmail() {
+            const body = encodeURIComponent(`工作報告\n日期: ${structuredData.date}\n內容: ${resultText.value}`);
+            window.location.href = `mailto:?subject=FieldReport&body=${body}`;
+        }
+    </script>
+</body>
+</html>
