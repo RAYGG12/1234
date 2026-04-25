@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FieldVoice Pro v4</title>
+    <title>FieldVoice Pro v5</title>
     <link rel="manifest" href="/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
         body { font-family: 'Inter', sans-serif; }
@@ -14,56 +13,51 @@
         @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-900 flex flex-col items-center min-h-screen p-4 pb-12">
+<body class="bg-[#F8FAFC] text-[#1E293B] flex flex-col items-center min-h-screen p-4 pb-12">
     
-    <header class="w-full max-w-md flex justify-between items-center py-8">
+    <header class="w-full max-w-md flex justify-between items-center py-6">
         <div>
-            <h1 class="text-2xl font-black tracking-tighter text-slate-800">FIELDVOICE <span class="text-blue-600">PRO</span></h1>
-            <p id="status" class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Ready to Record</p>
+            <h1 class="text-xl font-black tracking-tighter">FIELDVOICE <span class="text-blue-600">PRO</span></h1>
+            <p id="status" class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Ready</p>
         </div>
-        <div class="bg-white p-2 rounded-full shadow-sm border border-slate-100">
-            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-        </div>
+        <select id="langSelect" class="bg-white border border-slate-200 text-xs font-bold rounded-lg px-2 py-1 outline-none">
+            <option value="zh-TW">繁體中文</option>
+            <option value="en-US">English</option>
+            <option value="sv-SE">Svenska</option>
+            <option value="ja-JP">日本語</option>
+        </select>
     </header>
 
-    <main class="w-full max-w-md space-y-6">
+    <main class="w-full max-w-md space-y-5">
         
-        <div class="bg-white rounded-[2.5rem] p-8 shadow-xl shadow-slate-200/50 border border-white flex flex-col items-center space-y-6">
-            <button id="recordBtn" class="w-24 h-24 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-200 transition-all active:scale-90">
-                <svg id="micIcon" class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <div class="bg-white rounded-[2rem] p-8 shadow-sm border border-slate-100 flex flex-col items-center space-y-4">
+            <button id="recordBtn" class="w-20 h-20 rounded-full bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-100 transition-all active:scale-90">
+                <svg id="micIcon" class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/><path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                 </svg>
             </button>
-            <div class="text-center">
-                <p class="text-sm font-medium text-slate-500">點擊開始即時說話</p>
-                <div class="flex items-center justify-center mt-4 space-x-2">
-                    <label class="cursor-pointer text-blue-600 text-xs font-bold hover:underline">
-                        或上傳語音檔
-                        <input type="file" id="audioUpload" class="hidden" accept="audio/*">
-                    </label>
-                </div>
+            <p id="instruction" class="text-[11px] font-medium text-slate-400 uppercase tracking-tight">Tap to Start</p>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 space-y-4">
+            <textarea id="resultText" class="w-full bg-transparent border-none text-slate-700 text-base leading-relaxed focus:ring-0 resize-none h-40" placeholder="內容..."></textarea>
+            
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                <div><span id="label-company" class="text-[10px] text-slate-400 block mb-1 uppercase font-bold">Company</span><span id="p-company" class="font-bold text-sm">-</span></div>
+                <div><span id="label-price" class="text-[10px] text-slate-400 block mb-1 uppercase font-bold">Price</span><span id="p-price" class="font-bold text-sm">-</span></div>
             </div>
         </div>
 
-        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 space-y-4">
-            <div class="flex justify-between items-center border-b border-slate-50 pb-3">
-                <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Smart Capture</h3>
-                <button onclick="location.reload()" class="text-[10px] font-bold text-slate-300">RESET</button>
-            </div>
+        <div id="exportGrid" class="grid grid-cols-2 gap-3 opacity-20 pointer-events-none">
+            <button onclick="exportExcel()" class="bg-slate-900 text-white py-4 rounded-xl text-xs font-bold">EXCEL (CSV)</button>
+            <button onclick="sendEmail()" class="bg-white text-slate-900 border border-slate-200 py-4 rounded-xl text-xs font-bold font-bold">EMAIL</button>
             
-            <textarea id="resultText" class="w-full bg-transparent border-none text-slate-700 text-base leading-relaxed focus:ring-0 resize-none h-32" placeholder="語音轉譯內容將顯示於此..."></textarea>
-            
-            <div id="parsedInfo" class="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 text-[11px]">
-                <div><span class="text-slate-400 block mb-1 uppercase">Company</span><span id="p-company" class="font-bold text-slate-700">-</span></div>
-                <div><span class="text-slate-400 block mb-1 uppercase">Price</span><span id="p-price" class="font-bold text-slate-700">-</span></div>
-            </div>
-        </div>
-
-        <div id="exportGrid" class="grid grid-cols-2 gap-3 opacity-30 pointer-events-none">
-            <button onclick="exportExcel()" class="bg-slate-900 text-white py-4 rounded-2xl text-xs font-bold shadow-lg shadow-slate-200">EXCEL (CSV)</button>
-            <button onclick="exportPDF()" class="bg-white text-slate-900 border border-slate-200 py-4 rounded-2xl text-xs font-bold">PDF REPORT</button>
-            <button onclick="exportWord()" class="bg-white text-slate-900 border border-slate-200 py-4 rounded-2xl text-xs font-bold">WORD DOC</button>
-            <button onclick="sendEmail()" class="bg-blue-50 text-blue-600 py-4 rounded-2xl text-xs font-bold">SEND EMAIL</button>
+            <button onclick="shareToSocial('line')" class="bg-[#00B900] text-white py-4 rounded-xl text-xs font-bold flex items-center justify-center space-x-1">
+                <span>LINE / IG / FB</span>
+            </button>
+            <button onclick="shareToSocial('messenger')" class="bg-[#0084FF] text-white py-4 rounded-xl text-xs font-bold flex items-center justify-center space-x-1">
+                <span>MESSENGER</span>
+            </button>
         </div>
     </main>
 
@@ -71,113 +65,24 @@
         const recordBtn = document.getElementById('recordBtn');
         const resultText = document.getElementById('resultText');
         const statusText = document.getElementById('status');
+        const langSelect = document.getElementById('langSelect');
         const exportGrid = document.getElementById('exportGrid');
-        const audioUpload = document.getElementById('audioUpload');
+        
         let isRecording = false;
-        let structuredData = { date: '', company: '', item: '', price: '' };
+        let structuredData = { company: '-', price: '-' };
 
-        // 修正版語音啟動邏輯
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.lang = 'zh-TW';
-            recognition.interimResults = true;
-
-            recordBtn.onclick = async () => {
-                // 手機端修正：啟動前先請求一次權限確保硬體喚醒
-                try {
-                    if (!isRecording) {
-                        await navigator.mediaDevices.getUserMedia({ audio: true });
-                        recognition.start();
-                        statusText.innerText = "Listening...";
-                    } else {
-                        recognition.stop();
-                        statusText.innerText = "Processed";
-                    }
-                } catch (err) {
-                    alert("麥克風啟動失敗，請檢查權限設定");
-                }
-            };
-
-            recognition.onstart = () => {
-                isRecording = true;
-                recordBtn.classList.add('mic-active');
-            };
-
-            recognition.onend = () => {
-                isRecording = false;
-                recordBtn.classList.remove('mic-active');
-                smartParse(resultText.value);
-            };
-
-            recognition.onresult = (event) => {
-                let text = "";
-                for (let i = 0; i < event.results.length; i++) {
-                    text += event.results[i][0].transcript;
-                }
-                resultText.value = text;
-                exportGrid.classList.remove('opacity-30', 'pointer-events-none');
-            };
-        }
-
-        // 語音檔轉文字 (模擬邏輯，真實環境需串接 API)
-        audioUpload.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                statusText.innerText = "Analyzing File...";
-                // 注意：純瀏覽器無法直接將語音檔轉文字。
-                // 這裡我們模擬一個處理過程，並提示使用者。
-                setTimeout(() => {
-                    resultText.value = `[檔案紀錄: ${file.name}]\n請注意：網頁版目前僅支援「即時語音辨識」。\n若要進行檔案轉譯，建議串接 Gemini 或 Whisper API。`;
-                    exportGrid.classList.remove('opacity-30', 'pointer-events-none');
-                    statusText.innerText = "File Loaded";
-                }, 1500);
-            }
+        // 語言字典
+        const i18n = {
+            'zh-TW': { ready: '準備就緒', listening: '正在聽取...', instruction: '點擊開始錄音', company: '公司', price: '金額' },
+            'en-US': { ready: 'Ready', listening: 'Listening...', instruction: 'Tap to record', company: 'Company', price: 'Price' },
+            'sv-SE': { ready: 'Redo', listening: 'Lyssnar...', instruction: 'Tryck för att spela in', company: 'Företag', price: 'Pris' },
+            'ja-JP': { ready: '準備完了', listening: '聴いています...', instruction: 'タップして開始', company: '会社名', price: '金額' }
         };
 
-        function smartParse(text) {
-            structuredData.date = new Date().toLocaleDateString();
-            const companyMatch = text.match(/(?:跟|與|向)(.*?公司)/);
-            structuredData.company = companyMatch ? companyMatch[1] : "General";
-            const priceMatch = text.match(/(\d+)\s*元/);
-            structuredData.price = priceMatch ? priceMatch[1] : "0";
-
-            document.getElementById('p-company').innerText = structuredData.company;
-            document.getElementById('p-price').innerText = structuredData.price + " TWD";
-        }
-
-        // 匯出功能與前版本相同，已針對白色系優化下載行為...
-        function exportExcel() {
-            const csv = "\uFEFF日期,公司,金額,內容\n" + `${structuredData.date},${structuredData.company},${structuredData.price},"${resultText.value}"`;
-            downloadFile(csv, 'Report.csv', 'text/csv');
-        }
-
-        function exportPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.setFontSize(20);
-            doc.text("FieldVoice Report", 20, 20);
-            doc.setFontSize(12);
-            doc.text(`Date: ${structuredData.date}`, 20, 40);
-            doc.text(`Details: ${resultText.value}`, 20, 60);
-            doc.save("Report.pdf");
-        }
-
-        function downloadFile(content, fileName, mimeType) {
-            const blob = new Blob([content], { type: mimeType });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = fileName;
-            a.click();
-        }
-
-        function sendEmail() {
-            const body = encodeURIComponent(`工作報告\n日期: ${structuredData.date}\n內容: ${resultText.value}`);
-            window.location.href = `mailto:?subject=FieldReport&body=${body}`;
-        }
-    </script>
-</body>
-</html>
+        function updateUI() {
+            const lang = langSelect.value;
+            statusText.innerText = i18n[lang].ready;
+            document.getElementById('instruction').innerText = i18n[lang].instruction;
+            document.getElementById('label-company').innerText = i18n[lang].company;
+            document.getElementById('label-price').innerText = i18n[lang].price;
+            resultText.placeholder = i18n[lang].ready
